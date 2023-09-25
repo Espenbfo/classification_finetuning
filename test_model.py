@@ -1,5 +1,5 @@
 import torch
-from dataset import load_dataset, load_dataloader
+from dataset import load_datasets, load_dataloader
 import cv2
 from torchvision.transforms import ToPILImage
 import numpy as np
@@ -12,7 +12,7 @@ def main():
     with open("classes.json", "r") as f:
         classes = json.load(f)
 
-    dataset = load_dataset(r"")
+    dataset, _ = load_datasets(r"", train_fraction=1.0)
     dataloader = load_dataloader(dataset, 1, True)
     model = load_model(len(classes), "weights.pt").to("cuda")
     model.eval()

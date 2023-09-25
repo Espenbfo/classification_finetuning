@@ -1,7 +1,7 @@
 import torch
 from tqdm import tqdm
 
-from dataset import load_dataset, load_dataloader
+from dataset import load_datasets, load_dataloader
 from model import init_model, load_model
 from torch.optim import Adam
 from torch.nn.functional import cross_entropy
@@ -21,16 +21,18 @@ LEARNING_RATE_FEATURES = 1e-4
 FILENAME = "weights.pt"
 TRAIN_TRANSFORMER = False
 DATASET_FOLDER = Path(r"")
+TRAIN_DATASET_FRACTION = 0.9
 
 
 def main():
     print("Cuda available?", torch.cuda.is_available())
-    dataset = load_dataset(DATASET_FOLDER)
-    dataloader = load_dataloader(dataset, BATCH_SIZE, True)
+    dataset_train, dataset_val = load_datasets(DATASET_FOLDER, TRAIN_DATASET_FRACTION)
+    dataloader_train = load_dataloader(dataset_train, BATCH_SIZE, True)
+    dataloader_val = load_dataloader(dataset_val, BATCH_SIZE, False)
     if CONTINUE_TRAINING:
-        model = load_model(len(dataset.classes), "weights.pt").to(DEVICE)
+        model = load_model(len(dataset_train.classes), "weights.pt").to(DEVICE)
     else:
-        model = init_model(len(dataset.classes)).to(DEVICE)
+        model = init_model(len(dataset_train.classes)).to(DEVICE)
     if TRAIN_TRANSFORMER:
         model.transformer.eval()
         optimizer_features = Adam(model.transformer.parameters(), LEARNING_RATE_FEATURES)
@@ -45,7 +47,8 @@ def main():
     for epoch in range(EPOCHS):
         print("epoch", epoch+1)
         total_loss = 0
-        for index, (batch,label) in (pbar := tqdm(enumerate(dataloader), total=len(dataloader))):
+        print("TRAIN")
+        for index, (batch,label) in (pbar := tqdm(enumerate(dataloader_train), total=len(dataloader_train))):
             batch = batch.to(DEVICE)
             label = label.to(DEVICE)
             result = model(batch)
@@ -70,6 +73,30 @@ def main():
             if (time.time() > checkpoint_time+CHECKPOINT_TIME*60):
                 torch.save(model.state_dict(), FILENAME)
                 checkpoint_time = time.time()
+        if not TRAIN_TRANSFORMER:
+            model.classifier.eval()
+        else:
+            model.eval()
+        print("VALIDATION")
+        val_accuracy = 0
+        val_loss = 0
+        for index, (batch,label) in (pbar := tqdm(enumerate(dataloader_train), total=len(dataloader_val))):
+            batch = batch.to(DEVICE)
+            label = label.to(DEVICE)
+
+            result = model(batch)
+            accuracy = torch.eq(label, torch.argmax(result, dim=1)).sum()/BATCH_SIZE
+            loss = cross_entropy(result, label)
+
+            val_accuracy += accuracy
+            val_loss += loss.detach().cpu()
+        
+        print(f"Average batch loss: {val_accuracy/len(dataloader_val)}, Average batch accuracy {val_loss/len(dataloader_val)}")
+
+        if not TRAIN_TRANSFORMER:
+            model.classifier.train()
+        else:
+            model.train()
 
 
 
