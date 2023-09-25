@@ -1,5 +1,4 @@
-from torchvision.models import efficientnet_v2_l, EfficientNet_V2_L_Weights
-import torch as tt
+import torch
 from torch import nn
 class Model(nn.Module):
     def __init__(self, dino, num_classes):
@@ -15,15 +14,15 @@ class Model(nn.Module):
 
 
 def init_model(classes):
-    model = tt.hub.load('facebookresearch/dinov2', 'dinov2_vitl14')
+    model = torch.hub.load('facebookresearch/dinov2', 'dinov2_vitl14')
 
     model = Model(model, classes)
     return model
 
 def load_model(classes, filename):
-    model = tt.hub.load('facebookresearch/dinov2', 'dinov2_vitl14')
+    model = torch.hub.load('facebookresearch/dinov2', 'dinov2_vitl14')
 
     model = Model(model, classes)
-    m_state_dict = tt.load(filename)
+    m_state_dict = torch.load(filename)
     model.load_state_dict(m_state_dict)
     return model
