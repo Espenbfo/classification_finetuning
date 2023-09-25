@@ -26,7 +26,7 @@ TRAIN_DATASET_FRACTION = 0.9
 
 def main():
     print("Cuda available?", torch.cuda.is_available())
-    dataset_train, dataset_val = load_datasets(DATASET_FOLDER, TRAIN_DATASET_FRACTION)
+    dataset_train, dataset_val = load_datasets(DATASET_FOLDER, train_fraction=TRAIN_DATASET_FRACTION)
     dataloader_train = load_dataloader(dataset_train, BATCH_SIZE, True)
     dataloader_val = load_dataloader(dataset_val, BATCH_SIZE, False)
     if CONTINUE_TRAINING:
@@ -39,7 +39,7 @@ def main():
     optimizer_classifier = Adam(model.classifier.parameters(), LEARNING_RATE_CLASSIFIER)
 
     with open("classes.json", "w") as f:
-        json.dump(dataset.classes, f)
+        json.dump(dataset_train.classes, f)
 
     loss_arr = np.zeros(LOSS_MEMORY)
     acc_arr = np.zeros(LOSS_MEMORY)
