@@ -8,6 +8,8 @@ from torch.nn.functional import cross_entropy
 import json
 import time
 import numpy as np
+from pathlib import Path
+
 DEVICE = "cuda"
 EPOCHS = 5
 CONTINUE_TRAINING = True
@@ -31,8 +33,8 @@ def main():
         model = init_model(len(dataset.classes)).to(DEVICE)
     if TRAIN_TRANSFORMER:
         model.transformer.eval()
-        optimizer_features = Adam(model.transformer.parameters(LEARNING_RATE_FEATURES))
-    optimizer_classifier = Adam(model.classifier.parameters(LEARNING_RATE_CLASSIFIER))
+        optimizer_features = Adam(model.transformer.parameters(), LEARNING_RATE_FEATURES)
+    optimizer_classifier = Adam(model.classifier.parameters(), LEARNING_RATE_CLASSIFIER)
 
     with open("classes.json", "w") as f:
         json.dump(dataset.classes, f)
