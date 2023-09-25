@@ -1,0 +1,1 @@
+A simple repo for finetuning dinov2 for classification tasks.
