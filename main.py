@@ -91,7 +91,7 @@ def main():
             val_accuracy += accuracy
             val_loss += loss.detach().cpu()
         
-        print(f"Average batch loss: {val_accuracy/len(dataloader_val)}, Average batch accuracy {val_loss/len(dataloader_val)}")
+        print(f"Average batch loss: {val_loss/len(dataloader_val)}, Average batch accuracy {val_accuracy/len(dataloader_val)}")
 
         if not TRAIN_TRANSFORMER:
             model.classifier.train()
