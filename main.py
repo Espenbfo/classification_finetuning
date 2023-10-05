@@ -12,7 +12,7 @@ from pathlib import Path
 
 DEVICE = "cuda"
 EPOCHS = 5
-CONTINUE_TRAINING = True
+CONTINUE_TRAINING = False
 LOSS_MEMORY = 300 # batches
 BATCH_SIZE = 4
 CHECKPOINT_TIME = 4 # Minutes
@@ -20,7 +20,7 @@ LEARNING_RATE_CLASSIFIER = 1e-3
 LEARNING_RATE_FEATURES = 1e-4
 FILENAME = "weights.pt"
 TRAIN_TRANSFORMER = False
-DATASET_FOLDER = Path(r"")
+DATASET_FOLDER = Path(r"datasets/Dataset_BUSI_with_GI")
 TRAIN_DATASET_FRACTION = 0.9
 
 
@@ -30,9 +30,9 @@ def main():
     dataloader_train = load_dataloader(dataset_train, BATCH_SIZE, True)
     dataloader_val = load_dataloader(dataset_val, BATCH_SIZE, False)
     if CONTINUE_TRAINING:
-        model = load_model(len(dataset_train.classes), "weights.pt").to(DEVICE)
+        model = load_model(len(classes), "weights.pt").to(DEVICE)
     else:
-        model = init_model(len(dataset_train.classes)).to(DEVICE)
+        model = init_model(len(classes)).to(DEVICE)
     if TRAIN_TRANSFORMER:
         model.transformer.eval()
         optimizer_features = Adam(model.transformer.parameters(), LEARNING_RATE_FEATURES)
@@ -80,7 +80,7 @@ def main():
         print("VALIDATION")
         val_accuracy = 0
         val_loss = 0
-        for index, (batch,label) in (pbar := tqdm(enumerate(dataloader_train), total=len(dataloader_val))):
+        for index, (batch,label) in (pbar := tqdm(enumerate(dataloader_val), total=len(dataloader_val))):
             batch = batch.to(DEVICE)
             label = label.to(DEVICE)
 
