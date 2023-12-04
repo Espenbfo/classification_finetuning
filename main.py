@@ -94,7 +94,7 @@ def main():
         print("VALIDATION")
         val_accuracy = 0
         val_loss = 0
-        for index, (batch,label) in (pbar := tqdm(enumerate(dataloader_val), total=len(dataloader_val))):
+        for index, (batch,label) in (pbar := tqdm(enumerate(dataloader_train), total=len(dataloader_val))):
             batch = batch.to(DEVICE)
             label = label.to(DEVICE)
 
